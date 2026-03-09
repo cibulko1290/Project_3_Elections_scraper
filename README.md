@@ -34,7 +34,7 @@ Skript se spouští z terminálu a vyžaduje dva argumenty:
 
 Průbeh stahování:
 
-<p>Spracovávam dáta z: https://www.volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=12&xnumnuts=7103
+<p>Spracovávam dáta z: https://www.volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=12&xnumnuts=7103<br>
 Stahuji data pro: Alojzov<br>
 Stahuji data pro: Bedihošť<br>
 Stahuji data pro: Bílovice-Lutotín<br>

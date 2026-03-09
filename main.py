@@ -147,11 +147,23 @@ def main(url, vystup_csv):
     URL: odkaz na územný celok z volby.cz
     VYSTUP_CSV: názov súboru, do ktorého sa uložia dáta.
     """
-    if not url.startswith("https://www.volby.cz/"):
-        click.echo("Chyba: Toto nevyzerá ako správna URL z volby.cz")
+    if not url.startswith("https://www.volby.cz/pls/ps2017nss/"):
+        click.echo("CHYBA: Neplatná URL adresa.")
+        return
+
+    # 2. Kontrola, zda odkaz vede na správný typ výsledků (územní celek)
+    if "ps32" not in url:
+        click.echo(
+            "CHYBA: Nesprávný odkaz. Vyberte odkaz ze sloupce 'Výběr obce' (ps32)."
+        )
+        return
+
+    if not vystup_csv.endswith(".csv"):
+        click.echo("CHYBA: Výstupní soubor musí mít příponu .csv")
         return
 
     click.echo(f"Spracovávam dáta z: {url}")
+
     obsah_stranky = nacti_obsah_stranky(url)
 
     if obsah_stranky:
@@ -159,8 +171,9 @@ def main(url, vystup_csv):
         uloz_do_csv(data, vystup_csv)
         click.echo(f"Hotovo! Výsledky sú v {vystup_csv}")
     else:
-        click.echo("Chyba: Nepodarilo sa stiahnuť dáta z hlavnej URL.")
-
+        click.echo(
+            "CHYBA: Nepodarilo sa stiahnuť dáta. Skontrolujte pripojenie alebo URL."
+        )
 
 if __name__ == "__main__":
     main()
