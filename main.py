@@ -11,13 +11,21 @@ from bs4 import BeautifulSoup as bs
 import click
 import csv
 
+
 def vycisti_cislo(tag):
+    """
+    Očistí text z HTML tagu od nezlomitelných mezer a převede jej na celé číslo.
+    """
     if tag:
         text = tag.get_text(strip=True)
         return int(text.replace("\xa0", ""))
     return 0
 
+
 def nacti_obsah_stranky(url: str):
+    """
+    Odešle požadavek na URL a vrátí objekt bs, pokud je odpověď úspěšná.
+    """
     try:
         odpoved = requests.get(url)
         odpoved.raise_for_status()
@@ -25,7 +33,22 @@ def nacti_obsah_stranky(url: str):
     except requests.exceptions.RequestException:
         return None
 
+
 def ziskej_data_obce(url_obce: str):
+    """
+    Stáhne a zpracuje volební výsledky pro konkrétní obec.
+
+    Args:
+        url_obce (str): Úplná URL adresa na detailní stránku obce.
+
+    Returns:
+        dict: Slovník, kde klíče jsou názvy (voliči, strany)
+        a hodnoty jsou počty hlasů.
+
+    Example:
+        Return: {"registred": 450, "envelopes": 400,
+                    "valid": 390, "Strana X": 150...}
+    """
     odpoved_obec = requests.get(url_obce)
     soup_obec = bs(odpoved_obec.text, "html.parser")
     vsechny_radky = soup_obec.find_all("tr")
@@ -44,12 +67,16 @@ def ziskej_data_obce(url_obce: str):
         if nazev_tag and hlasy_tag:
             nazev_strany = nazev_tag.get_text(strip=True)
             pocet_hlasu = vycisti_cislo(hlasy_tag)
-            # Přidáme stranu do slovníku dat
             data[nazev_strany] = pocet_hlasu
 
     return data
 
+
 def ziskej_obce(rozdeleny_text):
+    """
+    Projde hlavní tabulku územního celku, extrahuje základní info 
+    o obcích a pro každou spustí hloubkový scraping dat.
+    """
     vsechny_obce = []
     vsechny_radky = rozdeleny_text.find_all("tr")
     for radek in vsechny_radky:
@@ -70,21 +97,50 @@ def ziskej_obce(rozdeleny_text):
 
     return vsechny_obce
 
+
 def uloz_do_csv(data: list, nazev_souboru: str):
+    """
+    Uloží spracované dáta o voľbách do súboru formátu CSV.
+
+    Funkcia vytvorí hlavičku súboru dynamicky na základe kľúčov
+    prvého slovníka v zozname. Používa kódovanie 'utf-8-sig',
+    aby sa súbor správne zobrazoval v programe Microsoft Excel
+    vrátane českej diakritiky.
+
+    Args:
+        data (list): Zoznam slovníkov,
+                    kde každý slovník obsahuje dáta za jednu obec.
+        nazev_souboru (str): Názov alebo cesta k výslednému CSV súboru.
+
+    Returns:
+        None: Funkcia nič nevracia, priamo zapisuje do súboru na disk.
+
+    Example:
+        >>> data_ukazka = [
+        ... {"code": "589268", "location": "Alojzov", "registered": 205,
+                "envelopes": 145, "valid": 144, "Strana A": 50},
+        ... {"code": "589276", "location": "Bedihošť", "registered": 834,
+                "envelopes": 520, "valid": 515, "Strana A": 120}
+        ... ]
+        >>> uloz_do_csv(data_ukazka, "vysledky.csv")
+        # Vytvorí súbor 'vysledky.csv' s hlavičkou a dvoma riadkami dát.
+    """
     if not data:
         print("Žádná data k uložení.")
         return
 
     hlavicka = data[0].keys()
-    with open(nazev_souboru, mode="w", newline="", encoding="utf-8-sig") as soubor:
+    with open(
+        nazev_souboru, mode="w", newline="", encoding="utf-8-sig"
+    ) as soubor:
         writer = csv.DictWriter(soubor, fieldnames=hlavicka)
         writer.writeheader()
         writer.writerows(data)
 
 
 @click.command()
-@click.argument('url')
-@click.argument('vystup_csv')
+@click.argument("url")
+@click.argument("vystup_csv")
 def main(url, vystup_csv):
     """
     Elections Scraper - nástroj na sťahovanie výsledkov volieb.
@@ -96,7 +152,6 @@ def main(url, vystup_csv):
         return
 
     click.echo(f"Spracovávam dáta z: {url}")
-    # --- TADY SE DĚJE TA MAGIE ---
     obsah_stranky = nacti_obsah_stranky(url)
 
     if obsah_stranky:
@@ -105,6 +160,7 @@ def main(url, vystup_csv):
         click.echo(f"Hotovo! Výsledky sú v {vystup_csv}")
     else:
         click.echo("Chyba: Nepodarilo sa stiahnuť dáta z hlavnej URL.")
+
 
 if __name__ == "__main__":
     main()
