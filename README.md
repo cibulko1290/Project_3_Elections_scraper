@@ -29,8 +29,9 @@ Skript se spouští z terminálu a vyžaduje dva argumenty:
 
 **Příklad spuštění:**
 
-    ```powershell
-    python main.py "https://www.volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=12&xnumnuts=7103" "vysledky_prostejov.csv"
+```powershell
+python main.py "https://www.volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=12&xnumnuts=7103" "vysledky_prostejov.csv"
+```
 
 Průbeh stahování:
 

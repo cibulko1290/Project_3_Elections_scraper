@@ -151,7 +151,6 @@ def main(url, vystup_csv):
         click.echo("CHYBA: Neplatná URL adresa.")
         return
 
-    # 2. Kontrola, zda odkaz vede na správný typ výsledků (územní celek)
     if "ps32" not in url:
         click.echo(
             "CHYBA: Nesprávný odkaz. Vyberte odkaz ze sloupce 'Výběr obce' (ps32)."
